@@ -1,7 +1,7 @@
 .header {
   height: 34vw;
   margin: 30px auto;
-  background:  url('/header_img.png') no-repeat;
+  background: url("/header_img.png") no-repeat;
   background-size: contain;
   position: relative;
 }
@@ -37,4 +37,21 @@
   background-color: white;
   font-size: max(1vw, 13px);
   border-radius: 50px;
+}
+
+@media (max-width: 1050px) {
+  .header-contents {
+    max-width: 55%;
+  }
+}
+
+@media (max-width: 750px) {
+
+  .header-contents p {
+    display: none;
+  }
+
+  .header-contents button {
+    padding: 2vw 4vw;
+  }
 }
