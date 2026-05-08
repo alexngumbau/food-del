@@ -5,9 +5,8 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 
-export const Add = () => {
+export const Add = ({url}) => {
 
-  const url = "http://localhost:4000"
 
   const [image, setImage] = useState(null);
   const [data, setData] = useState({
@@ -33,7 +32,6 @@ export const Add = () => {
     formData.append("image", image);
     
     const response = await axios.post(`${url}/api/food/add`, formData);
-    console.log(response);
 
     if (response.data.success) {
       setData({
@@ -49,11 +47,6 @@ export const Add = () => {
     }
     
   }
-
-  useEffect(() => {
-    console.log(data);
-    
-  }, [data])
 
   return (
     <div className="add">
