@@ -71,7 +71,7 @@ export const Add = ({url}) => {
             <p>Product category</p>
             <select onChange={onChangeHandler} value={data.category} name="category" id="">
               <option value="Salad">Salad</option>
-              <option value="Rolls">ROLLS</option>
+              <option value="Rolls">Rolls</option>
               <option value="Deserts">Deserts</option>
               <option value="Sandwich">Sandwich</option>
               <option value="Cake">Cake</option>
