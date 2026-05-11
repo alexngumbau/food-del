@@ -13,8 +13,6 @@ export const Orders = ({url}) => {
     const response = await axios.get(url + "/api/order/list-orders");
     if (response.data.success) {
       setOrders(response.data.data);
-      console.log(response.data.data);
-      
     } else {
       toast.error("Error");
     }
