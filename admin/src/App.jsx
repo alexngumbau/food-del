@@ -8,9 +8,19 @@ import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useContext } from 'react';
 import { StoreContext } from './context/StoreContext';
+import Login from './components/Login/Login';
 
 const App = () => {
   const {url, token} = useContext(StoreContext);
+
+  if (!token) {
+    return (
+      <>
+      <ToastContainer />
+      <Login />
+      </>
+    )
+  }
   return (
     <div>
       <ToastContainer />
