@@ -3,10 +3,12 @@ import { assets } from '../../assets/admin_assets/assets'
 import './Add.css'
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { StoreContext } from '../../context/StoreContext';
+import { useContext } from 'react';
 
 
-export const Add = ({url}) => {
-
+export const Add = () => {
+  const {url, token} = useContext(StoreContext);
 
   const [image, setImage] = useState(null);
   const [data, setData] = useState({
@@ -31,7 +33,7 @@ export const Add = ({url}) => {
     formData.append("category", data.category);
     formData.append("image", image);
     
-    const response = await axios.post(`${url}/api/food/add`, formData);
+    const response = await axios.post(`${url}/api/food/add`, formData , {headers: {token}});
 
     if (response.data.success) {
       setData({
