@@ -18,7 +18,7 @@ const loginUser = async (req,res) => {
       return res.json({success: false, message: "Invalid email or password"});
     }
 
-    const token = createToken(user._id);
+    const token = createToken(user._id, user.role);
 
     res.json({success: true, token});
   } catch (error) {
@@ -27,8 +27,8 @@ const loginUser = async (req,res) => {
   }
 }
 
-const createToken = (id) => {
-  return jwt.sign({id}, process.env.JWT_SECRET);
+const createToken = (id, role) => {
+  return jwt.sign({id, role}, process.env.JWT_SECRET);
 }
 // register user
 const registerUser = async(req, res) => {
@@ -58,7 +58,7 @@ const registerUser = async(req, res) => {
     });
 
     const user = await newUser.save();
-    const token = createToken(user._id);
+    const token = createToken(user._id, user.role);
 
     res.json({success: true, token});
 
