@@ -68,4 +68,33 @@ const registerUser = async(req, res) => {
   }
 }
 
-export {loginUser, registerUser};
+
+// admin login
+const adminLogin = async (req, res) => {
+  const {email, password} = req.body;
+  try {
+    const user = await userModel.findOne({email});
+    if (!user) {
+      return res.json({success: false, message: "Invalid email or password"});
+    }
+
+    const isMatch = await bycrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.json({success: false, message: "Invalid email or password"});
+    }
+    if (user.role !== "admin") {
+      return res.json({success: false, message: "Access denied. Admins only."});
+    }
+
+    const token = createToken(user._id, user.role);
+
+    res.json({success: true, token});
+  } catch (error) {
+    console.log(error);
+    res.json({success: false, message: "Sever error. Please try again later."});
+  }
+}
+
+
+
+export {loginUser, registerUser, adminLogin};
