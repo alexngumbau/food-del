@@ -2,13 +2,17 @@ import { useEffect, useState } from 'react'
 import './List.css'
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useContext } from 'react';
+import { StoreContext } from '../../context/StoreContext';
 
-export const List = ({url}) => {
+export const List = () => {
+
+  const { url, token } = useContext(StoreContext);
 
   const [list, setList] = useState([]);
 
   const fetchList = async () => {
-    const response = await axios.get(`${url}/api/food/list`);  
+    const response = await axios.get(`${url}/api/food/list`);
     if (response.data.success) {
       setList(response.data.data);
     } else {
@@ -17,7 +21,7 @@ export const List = ({url}) => {
   }
 
   const removeFood = async(foodId) => {
-    const response = await axios.post(`${url}/api/food/remove`, {id:foodId});
+    const response = await axios.post(`${url}/api/food/remove`, {id:foodId}, {headers: {token}});
     await fetchList();
     if (response.data.success) {
       toast.success(response.data.message)
