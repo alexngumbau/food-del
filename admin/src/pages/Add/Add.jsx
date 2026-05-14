@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { assets } from '../../assets/admin_assets/assets'
 import './Add.css'
 import axios from 'axios';

@@ -4,13 +4,17 @@ import axios from 'axios';
 import { useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { assets } from '../../assets/admin_assets/assets';
+import { useContext } from 'react';
+import { StoreContext } from '../../context/StoreContext';
 
-export const Orders = ({url}) => {
+export const Orders = () => {
 
+  const {url, token} = useContext(StoreContext);
+  
   const [orders, setOrders ] = useState([]);
 
   const fetchAllOrders = async () => {
-    const response = await axios.get(url + "/api/order/list-orders");
+    const response = await axios.get(url + "/api/order/list-orders", {headers: {token}});
     if (response.data.success) {
       setOrders(response.data.data);
     } else {
@@ -22,7 +26,7 @@ export const Orders = ({url}) => {
     const response = await axios.post(url + "/api/order/update-status", {
       orderId,
       status: event.target.value
-    });
+    }, {headers: {token}});
     if (response.data.success) {
       await fetchAllOrders();
     }
@@ -33,7 +37,7 @@ export const Orders = ({url}) => {
 
   useEffect(() => {
     fetchAllOrders();
-  }, []);
+  }, [token]);
 
   return (
     <div className="order add">
