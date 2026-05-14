@@ -12,3 +12,44 @@
 .navbar .profile {
   width: 40px;
 }
+
+.navbar-profile {
+  position: relative;
+}
+
+.navbar-profile .profile  {
+  cursor: pointer;
+}
+
+.navbar-profile-dropdown {
+  display: none;
+  position: absolute;
+  background-color: #fff2ef;
+  right: 0;
+  top: 100%;
+  background-color: #fff0ed;
+  border: 1px solid tomato;
+  border-radius: 4px;
+  padding: 10px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  gap: 10px;
+  z-index: 1;
+}
+
+.navbar-profile:hover .navbar-profile-dropdown {
+  display: flex;
+}
+
+.navbar-profile-dropdown  p{
+  cursor: pointer;
+  font-size: 14px;
+  
+}
+
+.navbar-profile-dropdown img {
+  width: 16px;
+}
+
+.navbar-profile-dropdown p:hover {
+  color: tomato;
+}
