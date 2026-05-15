@@ -15,6 +15,7 @@ export const Orders = () => {
 
   const fetchAllOrders = async () => {
     const response = await axios.get(url + "/api/order/list-orders", {headers: {token}});
+    
     if (response.data.success) {
       setOrders(response.data.data);
     } else {
