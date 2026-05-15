@@ -12,8 +12,11 @@ const authMiddleware = async(req, res, next) => {
     req.userRole = token_decode.role;
     next();
   } catch (error) {
-    console.log(error);
-    res.json({success: false, message: "Invalid or expired token. Please login again."})
+    console.log('We have an error: ',error.name);
+    if (error.name === "TokenExpiredError") {
+      return res.json({success: false, message: "Token expired", expired: true});
+    }
+    res.json({success: false, message: "Invalid token. Please login again."})
   }
 }
 

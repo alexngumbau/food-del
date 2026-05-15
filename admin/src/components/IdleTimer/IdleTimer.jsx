@@ -3,7 +3,7 @@ import './IdleTimer.css'
 import { StoreContext } from '../../context/StoreContext';
 import axios from 'axios';
 
-const IDLE_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 const WARNING_DURATION = 60; // 60 seconds countdown
 
 const IdleTimer = ({children}) => {
