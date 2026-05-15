@@ -1,0 +1,77 @@
+.idle-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.idle-modal {
+  background-color: white;
+  padding: 32px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0,0,0, 0.3);
+}
+
+.idle-modal h3 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  color: #333;
+}
+
+.idle-modal p {
+  margin: 0 0 24px;
+  font-size: 16px;
+  color: #555;
+}
+
+.idle-countdown {
+  font-size: 35px;
+  font-weight: 700;
+  color: tomato;
+  margin: 16px 0;
+}
+
+.idle-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.idle-stay {
+  padding: 10px 24px;
+  background: tomato;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.idle-stay:hover {
+  background-color: #e04030;
+}
+
+.idle-logout {
+  padding: 10px 24px;
+  background: transparent;
+  color: #666;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.idle-logout:hover {
+  background: #f5f5f5;
+}
