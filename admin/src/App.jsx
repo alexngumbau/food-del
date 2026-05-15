@@ -9,6 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useContext } from 'react';
 import { StoreContext } from './context/StoreContext';
 import Login from './components/Login/Login';
+import IdleTimer from './components/IdleTimer/IdleTimer';
 
 const App = () => {
   const {url, token} = useContext(StoreContext);
@@ -22,7 +23,8 @@ const App = () => {
     )
   }
   return (
-    <div>
+    <IdleTimer>
+      <div>
       <ToastContainer />
       <Navbar />
       <hr />
@@ -35,6 +37,7 @@ const App = () => {
         </Routes>
       </div>
     </div>
+    </IdleTimer>
   )
 }
 

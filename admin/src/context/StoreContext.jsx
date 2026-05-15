@@ -16,7 +16,7 @@ const StoreContextProvider = (props) => {
     }
 
     if (localStorage.getItem("admin_refresh_token")) {
-      setToken(localStorage.getItem("admin_refresh_token"));
+      setRefreshToken(localStorage.getItem("admin_refresh_token"));
     }
   }, []);
 
