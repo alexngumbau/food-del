@@ -6,7 +6,7 @@ import './Login.css';
 import { toast } from 'react-toastify';
 
 const Login = () => {
-  const {url, setToken} = useContext(StoreContext);
+  const {url, setToken, setRefreshToken} = useContext(StoreContext);
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -22,7 +22,9 @@ const Login = () => {
     
     if (response.data.success) {
       localStorage.setItem("admin_token", response.data.token);
+      localStorage.setItem("admin_refresh_token", response.data.refreshToken);
       setToken(response.data.token);
+      setRefreshToken(response.data.refreshToken);
       toast.success(response.data.message);
     } else {
       toast.error(response.data.message);

@@ -5,12 +5,9 @@ import { StoreContext } from '../../context/StoreContext'
 
 export const Navbar = () => {
 
-  const {setToken} = useContext(StoreContext);
+  const { logout } = useContext(StoreContext);
 
-  const logout = () => {
-    localStorage.removeItem("admin_token");
-    setToken("");
-  }
+  
 
   return (
     <div className="navbar">
