@@ -117,9 +117,48 @@ const registerUser = async(req, res) => {
   }
 }
 
+// create admin
+const createAdmin = async (req, res) => {
+  const {name, email, password} = req.body;
+  try {
+    const exists = await userModel.findOne({ email});
+    if (exists) {
+      return res.json({success: false, message: "User with this email already exists"});
+    }
+
+    if (!validator.isEmail(email)) {
+      return res.json({success: false, message: "Please enter a valid email"})
+    }
+
+    if (!password || password.length < 0) {
+      return res.json({success: false, message: "Password must be at least 8 characters long"})
+    }
+
+    if (!name || name.trim().length === 0) {
+      return res.json({success: false, message: "Name is required"});
+    }
+
+    const salt = await bycrypt.genSalt(10);
+    const hashedPassword = await bycrypt.hash(password, salt);
+
+    const newAdmin = new userModel ({
+      name,
+      email,
+      password: hashedPassword,
+      role: "admin"
+    })
+
+    await newAdmin.save();
+    res.json({success: true, message: `Admin user ${email} created successfully`});
+  } catch (error) {
+    console.log(error);
+    res.json({success: false, message: "Sever error.Please try again later."});
+  }
+}
 
 
 
 
 
-export {loginUser, registerUser, adminLogin, refreshAccessToken};
+
+export {loginUser, registerUser, adminLogin, refreshAccessToken, createAdmin};
