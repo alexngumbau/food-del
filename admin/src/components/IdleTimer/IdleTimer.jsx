@@ -46,7 +46,6 @@ const IdleTimer = ({children}) => {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(countdownRef.current);
-          logout();
           return 0;
         }
         return prev - 1;
@@ -54,7 +53,14 @@ const IdleTimer = ({children}) => {
     }, 1000);
 
     return () => clearInterval (countdownRef.current);
-  }, [showWarning, logout])
+  }, [showWarning]);
+
+  // logout when countdown reaches 0
+  useEffect(() => {
+    if (countdown === 0 && showWarning) {
+      logout();
+    }
+  }, [countdown, showWarning, logout]);
 
 
   const handleStayLoggedIn = async () => {
