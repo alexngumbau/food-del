@@ -30,6 +30,11 @@
   border-color: tomato;
 }
 
+.admin-image {
+  width: 30px;
+  opacity: 0.8;
+}
+
 @media (max-width: 900px) {
   .sidebar-option p {
     display: none;

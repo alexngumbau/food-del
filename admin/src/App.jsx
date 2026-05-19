@@ -10,6 +10,7 @@ import { useContext } from 'react';
 import { StoreContext } from './context/StoreContext';
 import Login from './components/Login/Login';
 import IdleTimer from './components/IdleTimer/IdleTimer';
+import { Admins } from './pages/admins/Admins';
 
 const App = () => {
   const {url, token} = useContext(StoreContext);
@@ -34,6 +35,7 @@ const App = () => {
           <Route path='/add' element={<Add url={url, token}/>} />
           <Route path='/list' element={<List url={url}/>} />
           <Route path='/orders' element={<Orders url={url}/>} />
+          <Route path='/admins' element={<Admins />} />
         </Routes>
       </div>
     </div>

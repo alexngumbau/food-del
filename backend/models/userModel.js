@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ["user", "admin"], default: "user" },
     cartData: { type: Object, default: {} },
   },
-  { minimize: false },
+  { minimize: false, timestamps: true },
 );
 
 const userModel = mongoose.model.user || mongoose.model("user", userSchema);
