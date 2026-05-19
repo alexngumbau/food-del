@@ -157,8 +157,19 @@ const createAdmin = async (req, res) => {
 }
 
 
+// list all admin users
+const listAdmins = async (req, res) => {
+  try {
+    const admins = await userModel.find({ role: "admin"}).select("-password -cartData");
+    res.json({success: true, data: admins});
+  } catch (error) {
+    console.log(error);
+    res.json({success: false, message: "Server error. Please try again later."})
+  }
+}
 
 
 
 
-export {loginUser, registerUser, adminLogin, refreshAccessToken, createAdmin};
+
+export {loginUser, registerUser, adminLogin, refreshAccessToken, createAdmin, listAdmins};

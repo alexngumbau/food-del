@@ -1,0 +1,77 @@
+.admins-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.admins-header p {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.admins-add-btn {
+  padding: 8px 16px;
+  background-color: tomato;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admins-add-btn:hover {
+  background-color: #e04030;
+}
+
+.admins-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.admins-form input {
+  padding: 10px;
+  border: 1px solid #cacaca;
+  border-radius: 4px;
+  font-size: 13px;
+  flex: 1;
+  min-width: 180px;
+}
+
+.admins-form button {
+  padding: 10px 20px;
+  background-color: black;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.admins-table-format {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  font-size: 13px;
+  border-bottom: 1px solid #b4a5a5;
+}
+
+
+.admins-empty {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+}
+
+@media (max-width: 600px) {
+  .admins-form {
+    flex-direction: column;
+  }
+}
+

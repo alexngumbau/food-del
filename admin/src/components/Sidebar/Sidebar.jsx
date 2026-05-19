@@ -22,6 +22,11 @@ const Sidebar = () => {
           <p>Orders</p>
         </NavLink>
 
+        <NavLink to='/admins' className="sidebar-option">
+          <img className='admin-image' src={assets.shield} />
+          <p>Admins</p>
+        </NavLink>
+
       </div>
     </div>
   )
