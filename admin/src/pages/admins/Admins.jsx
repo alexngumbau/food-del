@@ -5,12 +5,15 @@ import { useState } from 'react';
 import {toast} from 'react-toastify';
 import axios from 'axios';
 import { useEffect } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 export const Admins = () => {
 
   const {url, token} = useContext(StoreContext);
   const [admins, setAdmins] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [data, setData] = useState({
     name: "",
     email: "",
@@ -19,11 +22,14 @@ export const Admins = () => {
 
   const fetchAdmins = async() => {
     const response = await axios.get(`${url}/api/user/list-admins`, {headers: {token} });
+    console.log(response);
+    
     if (response.data.success) {
       setAdmins(response.data.data);
     } else {
       toast.error("Failed to fetch admins");
     }
+    setLoading(false);
   };
 
   const onChangeHandler = (e) => {
@@ -72,14 +78,26 @@ export const Admins = () => {
           <b>Email</b>
           <b>Created</b>
         </div>
-        {admins.map((admin) => (
+
+        {loading ? (
+          [...Array(9)].map((_, i) => (
+            <div key={i}  className="admins-table-format">
+              <Skeleton width="60" />
+              <Skeleton width="60" />
+              <Skeleton width="60" />
+            </div>
+          ))
+        ) : admins.length === 0 ? (
+          <p className='admins-empty'>No admin users found.</p>
+        ) : (
+          admins.map((admin) => (
           <div key={admin._id} className="admins-table-format">
             <p>{admin.name}</p>
             <p>{admin.email}</p>
             <p>{new Date(admin.createdAt || admin._id.toString().substring(0, 8)).toLocaleDateString()}</p>
           </div>
-        ))}
-        {admins.length === 0 && <p className='admins-empty'>No admin users found.</p>}
+        ))
+      )}
       </div>
     </div>
   )
