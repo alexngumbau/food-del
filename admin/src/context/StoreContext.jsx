@@ -57,6 +57,11 @@ const StoreContextProvider = (props) => {
             // Queue this request until refresh completes
             return new Promise((resolve) => {
               failedQueue.current.push((newToken) => {
+                if (!newToken) {
+                  resolve(response);
+                  return;
+                }
+
                 originalRequest.headers.token = newToken;
                 resolve(axios(originalRequest));
               });
@@ -78,16 +83,19 @@ const StoreContextProvider = (props) => {
                 const newToken = res.data.token;
                 localStorage.setItem("admin_token", newToken);
                 setToken(newToken);
+                processQueue(newToken);
 
                 // Retry the original request with the new token
                 originalRequest.headers.token = newToken;
                 return axios(originalRequest);
               } else {
+                processQueue(null);
                 logout();
                 return response;
               }
             })
             .catch(() => {
+              processQueue(null);
               logout();
               return response;
             })
@@ -104,15 +112,69 @@ const StoreContextProvider = (props) => {
     };
   }, [url, logout]);
 
-  useEffect(() => {
-    if (localStorage.getItem("admin_token")) {
-      setToken(localStorage.getItem("admin_token"));
+
+  const refreshAccessToken = useCallback( async () => {
+    const storedRefreshToken = localStorage.getItem("admin_refresh_token");
+    if (!storedRefreshToken) {
+      logout();
+      return null;
     }
 
-    if (localStorage.getItem("admin_refresh_token")) {
-      setRefreshToken(localStorage.getItem("admin_refresh_token"));
+    try {
+      const response = await axios.post(`${url}/api/user/refresh-token`, {refreshToken: storedRefreshToken});
+
+      if (response.data.success) {
+        const newToken = response.data.token;
+        localStorage.setItem("admin_token", newToken);
+        setToken(newToken);
+        return newToken;
+      }
+
+      logout();
+      return null;
+    } catch {
+      logout();
+      return null;
     }
-  }, []);
+  }, [url, logout]);
+
+  const getTokenExpiryTime = (token) => {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.exp * 1000;
+    } catch  {
+      return null;
+    }
+  }
+
+  useEffect(() => {
+    if (!token) return;
+
+    const expiryTime = getTokenExpiryTime(token);
+    if (!expiryTime) {
+      const timer = setTimeout(() => {
+        logout();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+
+    const refreshTime = expiryTime - Date.now() - 15 * 1000;
+
+    if (refreshTime <= 0) {
+      const timer = setTimeout(() => {
+        refreshAccessToken();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+
+    const timer = setTimeout(() => {
+      refreshAccessToken();
+    }, refreshTime);
+
+    return () => clearTimeout(timer);
+  }, [token, logout, refreshAccessToken]);
+
+  
 
   const contextValue = {
     url,
