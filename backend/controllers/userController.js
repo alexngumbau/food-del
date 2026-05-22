@@ -20,7 +20,7 @@ const loginUser = async (req,res) => {
       return res.json({success: false, message: "Invalid email or password"});
     }
 
-    const accessToken = createToken(user._id, user.role, "1m");
+    const accessToken = createToken(user._id, user.role, "15m");
     const refreshToken = createToken(user._id, user.role, "7d");
 
     res.json({success: true, token: accessToken, refreshToken});
@@ -48,7 +48,7 @@ const adminLogin = async (req, res) => {
       return res.json({success: false, message: "Access denied. Admins only."});
     }
 
-    const accessToken = createToken(user._id, user.role, "1m");
+    const accessToken = createToken(user._id, user.role, "15m");
     const refreshToken = createToken(user._id, user.role, "7d");
 
     res.json({success: true, token: accessToken, refreshToken});
@@ -64,16 +64,14 @@ const createToken = (id, role, expiresIn) => {
 }
 
 // refresh token
-const refreshAccessToken = (req, res) => {
-  console.log('HOOORAY I GOT CALLED');
-  
+const refreshAccessToken = (req, res) => {  
   const {refreshToken} = req.body;
   if (!refreshToken) {
     return res.json({success: false, message: "No refresh token provided"});
   }
   try {
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    const accessToken = createToken(decoded.id, decoded.role, "1m");
+    const accessToken = createToken(decoded.id, decoded.role, "15m");
     res.json({success: true, token: accessToken});
   } catch (error) {
     res.json({success: false, message: "Invalid or expired refresh token. Please login again."});
@@ -109,7 +107,7 @@ const registerUser = async(req, res) => {
     });
 
     const user = await newUser.save();
-    const accessToken = createToken(user._id, user.role, "1m");
+    const accessToken = createToken(user._id, user.role, "15m");
     const refreshToken = createToken(user._id, user.role, "7d");
 
     res.json({success: true, token: accessToken, refreshToken});
