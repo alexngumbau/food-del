@@ -107,9 +107,10 @@ const registerUser = async(req, res) => {
     });
 
     const user = await newUser.save();
-    const token = createToken(user._id, user.role);
+    const accessToken = createToken(user._id, user.role, "6m");
+    const refreshToken = createToken(user._id, user.role, "7d");
 
-    res.json({success: true, token});
+    res.json({success: true, token: accessToken, refreshToken});
 
   } catch (error) {
     console.log(error);

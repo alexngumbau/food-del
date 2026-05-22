@@ -8,7 +8,7 @@ import axios from 'axios';
 
 const LoginPopup = ({ setShowLogin }) => {
   const [currState, setCurrState] = useState("Login");
-  const {url, token, setToken} = useContext(StoreContext);
+  const {url, setToken, setRefreshToken } = useContext(StoreContext);
 
   const [data, setData] = useState({
     name: "",
@@ -35,7 +35,9 @@ const LoginPopup = ({ setShowLogin }) => {
 
     if (response.data.success) {
       setToken(response.data.token)
-      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user_token", response.data.token);
+      setRefreshToken(response.data.refreshToken);
+      localStorage.setItem("user_refresh_token", response.data.refreshToken);
       setShowLogin(false);
     } else {
       alert(response.data.message);
