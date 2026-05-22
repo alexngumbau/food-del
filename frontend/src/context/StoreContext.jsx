@@ -8,8 +8,8 @@ const StoreContextProvider = (props) => {
 
   const url = "http://localhost:4000";
   const [cartItems, setCartItems] = useState({});
-  const [token,setToken] = useState(localStorage.getItem("user_token") || "");
-  const [refreshToken, setRefreshToken] = useState(localStorage.getItem("user_refresh_token") || "");
+  const [token,setToken] = useState("");
+  const [authLoading, setAuthLoading] = useState(true);
   const [food_list, setFoodList] = useState([]);
   
   const isRefreshing = useRef(false);
@@ -21,11 +21,24 @@ const StoreContextProvider = (props) => {
   }
 
   const logout = useCallback(() => {
-    localStorage.removeItem("user_token");
-    localStorage.removeItem("user_refresh_token");
     setToken("");
-    setRefreshToken("");
   }, []);
+
+  useEffect(() => {
+    const restoreSession = async () => {
+      try {
+        const response = await axios.post(`${url}/api/user/refresh-token`, {}, { withCredentials: true });
+
+        if (response.data.success) {
+          setToken(response.data.token);
+        }
+      } finally {
+        setAuthLoading(false);
+      }
+    }
+
+    restoreSession();
+  }, [url]);
 
 
   useEffect(() => {
@@ -66,16 +79,11 @@ const StoreContextProvider = (props) => {
 
           isRefreshing.current = true;
 
-          const storedRefreshToken = localStorage.getItem("user_refresh_token");
-
           return axios
-            .post(`${url}/api/user/refresh-token`, {
-              refreshToken: storedRefreshToken,
-            })
+            .post(`${url}/api/user/refresh-token`, {}, {withCredentials: true})
             .then((res) => {
               if (res.data.success) {
                 const newToken = res.data.token;
-                localStorage.setItem("user_token", newToken);
                 setToken(newToken);
                 processQueue(newToken);
 
@@ -109,21 +117,12 @@ const StoreContextProvider = (props) => {
   }, [url, logout]);
 
   const refreshAccessToken = useCallback(async () => {
-    const storeRefreshToken = localStorage.getItem("user_refresh_token");
-
-    if (!storeRefreshToken) {
-      logout();
-      return null;
-    }
-
+    
     try {
-      const response = await axios.post(`${url}/api/user/refresh-token`, {
-        refreshToken: storeRefreshToken,
-      });
+      const response = await axios.post(`${url}/api/user/refresh-token`, {}, {withCredentials: true});
 
       if (response.data.success) {
         const newToken = response.data.token;
-        localStorage.setItem("user_token", newToken);
         setToken(newToken);
         return newToken;
       }
@@ -216,16 +215,20 @@ const StoreContextProvider = (props) => {
   }
 
   useEffect(() => {
-    
-    async function loadData() {
-      await fetchFoodList();
-      const storedToken = localStorage.getItem("user_token");
-      if (storedToken) {
-        await loadCartData(storedToken);
-      }
-    }
-    loadData();
+    const timer = setTimeout(() => {
+      fetchFoodList();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (!token) return;
+
+    const timer = setTimeout(() => {
+      loadCartData(token);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [token]);
 
   const contextValue = {
     food_list,
@@ -237,8 +240,7 @@ const StoreContextProvider = (props) => {
     url,
     token,
     setToken,
-    refreshToken,
-    setRefreshToken,
+    authLoading,
     logout,
   };
 
