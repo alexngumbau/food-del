@@ -8,8 +8,16 @@ const StoreContextProvider = (props) => {
 
   const url = "http://localhost:4000";
   const [cartItems, setCartItems] = useState({});
-  const [token,setToken] = useState("");
+  const [token,setToken] = useState(localStorage.getItem("user_token") || "");
+  const [refreshToken, setRefreshToken] = useState(localStorage.getItem("user_refresh_token") || "");
   const [food_list, setFoodList] = useState([]);
+
+  const logout = () => {
+    localStorage.removeItem("user_token");
+    localStorage.removeItem("user_refresh_token");
+    setToken("");
+    setRefreshToken("");
+  }
 
   const addToCart = async (itemId) => {
     if (!cartItems[itemId]) {
@@ -55,9 +63,10 @@ const StoreContextProvider = (props) => {
     
     async function loadData() {
       await fetchFoodList();
-      if (localStorage.getItem("token")) {
-        setToken(localStorage.getItem("token"));
-        await loadCartData(localStorage.getItem("token"));
+      const storedToken = localStorage.getItem("user_token");
+      if (storedToken) {
+        setToken(storedToken);
+        await loadCartData(storedToken);
       }
     }
     loadData();
@@ -73,6 +82,9 @@ const StoreContextProvider = (props) => {
     url,
     token,
     setToken,
+    refreshToken,
+    setRefreshToken,
+    logout,
   };
 
   return (
