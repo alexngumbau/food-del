@@ -23,7 +23,10 @@ const loginUser = async (req,res) => {
     const accessToken = createToken(user._id, user.role, "15m");
     const refreshToken = createToken(user._id, user.role, "7d");
 
-    res.json({success: true, token: accessToken, refreshToken});
+    res
+      .cookie("refreshToken", refreshToken, refreshCookieOptions)
+      .json({success: true, token: accessToken});
+
 
   } catch (error) {
     console.log(error);
@@ -51,7 +54,10 @@ const adminLogin = async (req, res) => {
     const accessToken = createToken(user._id, user.role, "15m");
     const refreshToken = createToken(user._id, user.role, "7d");
 
-    res.json({success: true, token: accessToken, refreshToken});
+    res
+      .cookie("refreshToken", refreshToken, refreshCookieOptions)
+      .json({success: true, token: accessToken});
+
   } catch (error) {
     console.log(error);
     res.json({success: false, message: "Sever error. Please try again later."});
@@ -63,9 +69,17 @@ const createToken = (id, role, expiresIn) => {
   return jwt.sign({id, role} , secret, {expiresIn});
 }
 
+const refreshCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days:
+  path: "/",
+}
+
 // refresh token
 const refreshAccessToken = (req, res) => {  
-  const {refreshToken} = req.body;
+  const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) {
     return res.json({success: false, message: "No refresh token provided"});
   }
@@ -74,6 +88,7 @@ const refreshAccessToken = (req, res) => {
     const accessToken = createToken(decoded.id, decoded.role, "15m");
     res.json({success: true, token: accessToken});
   } catch (error) {
+    res.clearCookie("refreshToken", refreshCookieOptions);
     res.json({success: false, message: "Invalid or expired refresh token. Please login again."});
   }
 }
@@ -110,7 +125,9 @@ const registerUser = async(req, res) => {
     const accessToken = createToken(user._id, user.role, "15m");
     const refreshToken = createToken(user._id, user.role, "7d");
 
-    res.json({success: true, token: accessToken, refreshToken});
+    res
+      .cookie("refreshToken", refreshToken, refreshCookieOptions)
+      .json({success: true, token: accessToken});
 
   } catch (error) {
     console.log(error);
@@ -170,7 +187,14 @@ const listAdmins = async (req, res) => {
 }
 
 
+// logout user
+const logoutUser = (req, res) => {
+  res.clearCookie("refreshToken", refreshCookieOptions);
+  res.json({success: true, message: "Logged out successfully"});
+}
 
 
 
-export {loginUser, registerUser, adminLogin, refreshAccessToken, createAdmin, listAdmins};
+
+
+export {loginUser, registerUser, adminLogin, refreshAccessToken, createAdmin, listAdmins, logoutUser};

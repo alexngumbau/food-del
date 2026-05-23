@@ -8,6 +8,7 @@ import cartRouter from './routes/cartRoute.js';
 import orderRouter from './routes/orderRoute.js';
 import bcrypt from 'bcrypt';
 import userModel from './models/userModel.js';
+import cookieParser from 'cookie-parser';
 
 
 // app config
@@ -16,7 +17,11 @@ const port = 4000;
 
 // middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: [ "http://localhost:5173", "http://localhost:5174" ],
+  credentials: true,
+}));
+app.use(cookieParser());
 
 // Auto-seed admin if none exists
 const seedAdminFirst = async () => {
