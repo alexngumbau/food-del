@@ -30,7 +30,7 @@ const LoginPopup = ({ setShowLogin }) => {
     } else {
       newUrl += "/api/user/register";
     }
-    const response = await axios.post(newUrl, data);
+    const response = await axios.post(newUrl, data, {withCredentials: true});
     console.log(response);
 
     if (response.data.success) {
