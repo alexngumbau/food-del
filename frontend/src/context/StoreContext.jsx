@@ -20,9 +20,13 @@ const StoreContextProvider = (props) => {
     failedQueue.current = [];
   }
 
-  const logout = useCallback(() => {
-    setToken("");
-  }, []);
+  const logout = useCallback(async () => {
+    try {
+      await axios.post(`${url}/api/user/logout`, {}, { withCredentials: true });
+    } finally {
+      setToken("");
+    }
+  }, [url]);
 
   useEffect(() => {
     const restoreSession = async () => {

@@ -31,7 +31,7 @@ const LoginPopup = ({ setShowLogin }) => {
       newUrl += "/api/user/register";
     }
     const response = await axios.post(newUrl, data, {withCredentials: true});
-    console.log(response);
+    
 
     if (response.data.success) {
       setToken(response.data.token)

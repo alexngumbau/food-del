@@ -6,7 +6,7 @@ import './Login.css';
 import { toast } from 'react-toastify';
 
 const Login = () => {
-  const {url, setToken, setRefreshToken} = useContext(StoreContext);
+  const {url, setToken} = useContext(StoreContext);
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -18,13 +18,10 @@ const Login = () => {
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
-    const response = await axios.post(`${url}/api/user/admin-login`, data);
+    const response = await axios.post(`${url}/api/user/admin-login`, data, {withCredentials: true});
     
     if (response.data.success) {
-      localStorage.setItem("admin_token", response.data.token);
-      localStorage.setItem("admin_refresh_token", response.data.refreshToken);
       setToken(response.data.token);
-      setRefreshToken(response.data.refreshToken);
       toast.success(response.data.message);
     } else {
       toast.error(response.data.message);

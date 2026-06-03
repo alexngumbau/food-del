@@ -1,14 +1,14 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import './IdleTimer.css'
 import { StoreContext } from '../../context/StoreContext';
-import axios from 'axios';
+
 
 const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 const WARNING_DURATION = 60; // 60 seconds countdown
 
 const IdleTimer = ({children}) => {
 
-  const {url, token, setToken, refreshToken, logout} = useContext(StoreContext);
+  const { token, refreshAccessToken, logout} = useContext(StoreContext);
   const [showWarning, setShowWarning] = useState(false);
   const [countdown, setCountdown] = useState(WARNING_DURATION);
 
@@ -64,26 +64,21 @@ const IdleTimer = ({children}) => {
 
 
   const handleStayLoggedIn = async () => {
-    try {
-      const response = await axios.post(`${url}/api/user/refresh-token`, {refreshToken});
-      if (response.data.success) {
-        localStorage.setItem("admin_token", response.data.token);
-        setToken(response.data.token);
-        setShowWarning(false);
-        setCountdown(WARNING_DURATION);
-        
-        // restart idle timer
-        if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-        idleTimerRef.current = setTimeout(() => {
-          setShowWarning(true);
-          setCountdown(WARNING_DURATION);
-        }, IDLE_TIMEOUT);
-      } else {
-        logout();
-      }
-    } catch {
-      logout();
+    const newToken = await refreshAccessToken();
+
+    if (!newToken) {
+      return;
     }
+
+    setShowWarning(false);
+    setCountdown(WARNING_DURATION);
+
+    // restart idle timer
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = setTimeout(() => {
+      setShowWarning(true);
+      setCountdown(WARNING_DURATION);
+    }, IDLE_TIMEOUT);
   }
 
   const handleLogout = () => {

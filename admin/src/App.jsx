@@ -13,7 +13,12 @@ import IdleTimer from './components/IdleTimer/IdleTimer';
 import { Admins } from './pages/admins/Admins';
 
 const App = () => {
-  const {url, token} = useContext(StoreContext);
+  const {url, token, authLoading} = useContext(StoreContext);
+
+
+  if (authLoading) {
+    return null;
+  }
 
   if (!token) {
     return (

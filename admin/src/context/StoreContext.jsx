@@ -7,10 +7,8 @@ export const StoreContext = createContext(null);
 
 const StoreContextProvider = (props) => {
   const url = "http://localhost:4000";
-  const [token, setToken] = useState(localStorage.getItem("admin_token") || "");
-  const [refreshToken, setRefreshToken] = useState(
-    localStorage.getItem("admin_refresh_token") || "",
-  );
+  const [token, setToken] = useState("")
+  const [authLoading, setAuthLoading] = useState(true);
 
   // Track if a refresh is already in progress to avoid duplicate calls
   const isRefreshing = useRef(false);
@@ -21,12 +19,30 @@ const StoreContextProvider = (props) => {
     failedQueue.current = [];
   };
 
-  const logout = useCallback(() => {
-    localStorage.removeItem("admin_token");
-    localStorage.removeItem("admin_refresh_token");
-    setToken("");
-    setRefreshToken("");
-  }, []);
+  const logout = useCallback(async () => {
+    try {
+      await axios.post(`${url}/api/user/logout`, {}, {withCredentials: true});
+    } finally {
+      setToken("");
+    }
+  }, [url]);
+
+
+  useEffect(() => {
+    const restoreSession = async () => {
+      try {
+        const response = await axios.post(`${url}/api/user/refresh-token`, {}, {withCredentials: true});
+        
+        if (response.data.success) {
+          setToken(response.data.token);
+        }
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    restoreSession();
+  }, [url])
 
   // set up axios response interceptor
   useEffect(() => {
@@ -70,18 +86,12 @@ const StoreContextProvider = (props) => {
 
           isRefreshing.current = true;
 
-          const storedRefreshToken = localStorage.getItem(
-            "admin_refresh_token",
-          );
-
+          
           return axios
-            .post(`${url}/api/user/refresh-token`, {
-              refreshToken: storedRefreshToken,
-            })
+            .post(`${url}/api/user/refresh-token`, {}, {withCredentials: true})
             .then((res) => {
               if (res.data.success) {
                 const newToken = res.data.token;
-                localStorage.setItem("admin_token", newToken);
                 setToken(newToken);
                 processQueue(newToken);
 
@@ -114,18 +124,11 @@ const StoreContextProvider = (props) => {
 
 
   const refreshAccessToken = useCallback( async () => {
-    const storedRefreshToken = localStorage.getItem("admin_refresh_token");
-    if (!storedRefreshToken) {
-      logout();
-      return null;
-    }
-
     try {
-      const response = await axios.post(`${url}/api/user/refresh-token`, {refreshToken: storedRefreshToken});
+      const response = await axios.post(`${url}/api/user/refresh-token`, {}, {withCredentials: true});
 
       if (response.data.success) {
         const newToken = response.data.token;
-        localStorage.setItem("admin_token", newToken);
         setToken(newToken);
         return newToken;
       }
@@ -180,8 +183,8 @@ const StoreContextProvider = (props) => {
     url,
     token,
     setToken,
-    refreshToken,
-    setRefreshToken,
+    authLoading,
+    refreshAccessToken,
     logout,
   };
 
