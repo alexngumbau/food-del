@@ -1,4 +1,3 @@
-import { Navbar } from "./components/Navbar/Navbar";
 import Sidebar from "./components/Sidebar/Sidebar";
 import { Route, Routes } from "react-router-dom";
 import { Add } from "./pages/Add/Add";
@@ -11,6 +10,7 @@ import { StoreContext } from "./context/StoreContext";
 import Login from "./components/Login/Login";
 import IdleTimer from "./components/IdleTimer/IdleTimer";
 import { Admins } from "./pages/admins/Admins";
+import Dashboard from "./pages/Dashboard/Dashboard";
 
 const App = () => {
   const { url, token, authLoading } = useContext(StoreContext);
@@ -35,6 +35,7 @@ const App = () => {
           <Sidebar />
           <div className="app-main">
             <Routes>
+              <Route path="/" element={<Dashboard />} />
               <Route path="/add" element={<Add url={url} token={token} />} />
               <Route path="/list" element={<List url={url} />} />
               <Route path="/orders" element={<Orders url={url} />} />
