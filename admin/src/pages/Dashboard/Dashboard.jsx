@@ -31,6 +31,24 @@ const RANGE = {
   ALL: 'all',
 };
 
+const startOfRange = (range) => {
+  const now = new Date();
+  if (range === RANGE.TODAY) {
+    const d = new Date(now);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+  if (range === RANGE.WEEK) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - 6); // include today + previous 6 days
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+  return null; // ALL = no lower bound
+}
+
+
+
 const Dashboard = () => {
 
   const {url, token} = useContext(StoreContext);
@@ -102,6 +120,20 @@ const Dashboard = () => {
     return buckets;
   }, [orders]);
 
+  // Stats filtered by the selected range
+  const stats = useMemo(() => {
+    const start = startOfRange(range);
+    const filtered = start 
+      ? orders.filter((o) => new Date(o.date) >= start)
+      : orders;
+
+    const count = filtered.length;
+    const revenue = filtered.reduce((sum, o) => sum + (o.amount || 0), 0);
+    const pending = filtered.filter((o) => o.status !== STATUS.DELIVERED).length;
+
+    return {count, revenue, pending};
+  }, [orders, range]);
+
   return (
     <div className="dashboard">
       <div className="dash-header">
@@ -119,15 +151,15 @@ const Dashboard = () => {
       <div className="dash-stats">
         <div className="stat">
           <div className="label">Orders</div>
-          <div className="value">24</div>
+          <div className="value">{loading ? '-' : stats.count}</div>
         </div>
         <div className="stat">
           <div className="label">Revenue</div>
-          <div className="value">$24</div>
+          <div className="value">{loading ? '-' : `$${stats.revenue.toLocaleString()}`}</div>
         </div>
         <div className="stat pending">
           <div className="label">Pending</div>
-          <div className="value">7</div>
+          <div className="value">{loading ? '-' : stats.pending}</div>
         </div>
       </div>
 
