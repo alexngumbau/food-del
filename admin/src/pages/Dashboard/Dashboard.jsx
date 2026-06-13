@@ -86,6 +86,22 @@ const Dashboard = () => {
       .slice(0, 5);
   }, [orders]);
 
+  // Group orders by status for the kanban view
+  const ordersByStatus = useMemo(() => {
+    const buckets = {
+      [STATUS.PROCESSING]: [],
+      [STATUS.DELIVERY]: [],
+      [STATUS.DELIVERED]: [],
+    }
+
+    orders.forEach((order) => {
+      if (buckets[order.status]) {
+        buckets[order.status].push(order);
+      }
+    });
+    return buckets;
+  }, [orders]);
+
   return (
     <div className="dashboard">
       <div className="dash-header">
@@ -165,9 +181,35 @@ const Dashboard = () => {
 
       </div>
 
+      {/* Kanban - orders grouped by status */}
+      <div className="columns">
+        {[STATUS.PROCESSING, STATUS.DELIVERY, STATUS.DELIVERED].map((status) => {
+          const meta = STATUS_META[status];
+          const items = ordersByStatus[status] ?? [];
+          return (
+            <div key={status} className="card kanban-card">
+              <div className={`col-header ${meta.cls}`}>
+                {meta.label} ({items.length})
+              </div>
 
+              {items.length === 0 && (
+                <div className = "kanban-empty" >No orders</div>
+              )}
 
-      
+              {items.slice(0, 6).map((order) => {
+                const customer = `${order.address?.firstName ?? ''} ${order.address?.lastName ?? ''}`.trim() || 'Customer';
+                const itemCount = order.items?.length ?? 0;
+                return (
+                  <div key={order._id} className="order-card" onClick={() => navigate('/orders')}>
+                    <div className="name">{customer}</div>
+                    <div className="meta">{itemCount} {itemCount === 1 ? 'item' : 'items'} • ${order.amount}</div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
     </div>
   )
 }
