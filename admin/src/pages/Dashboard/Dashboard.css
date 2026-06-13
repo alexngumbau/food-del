@@ -106,7 +106,7 @@
 
 .queue-row {
   display: grid;
-  grid-template-columns: 80px 1.6fr 1fr 1.2fr;
+  grid-template-columns: 70px 1.6fr 1fr 1.2fr 80px;
   gap: 8px;
   align-items: center;
   padding: 10px 0;
@@ -116,3 +116,47 @@
 .queue-row:last-child { border-bottom: none; }
 .queue-head { font-weight: 600; color: #555; }
 .queue-row .id { color: #888; font-size: 12px; }
+
+.queue-empty {
+  padding: 24px 0;
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+}
+
+/* Status badges */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge.processing { background: #fff4e5; color: #e08a00; }
+.badge.delivery   { background: #e5f1ff; color: #2476d2; }
+.badge.delivered  { background: #e5f8ed; color: #2bb673; }
+.badge.unknown { background: #eee; color: #555; }
+
+.view-btn {
+  padding: 5px 10px;
+  background: tomato;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.view-btn:hover {
+  background: #e5573f;            /* darker tomato — clearly different */
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(255, 99, 71, 0.4);
+}
+
+.view-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
