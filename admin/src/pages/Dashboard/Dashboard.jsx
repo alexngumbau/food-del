@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 import { StoreContext } from '../../context/StoreContext';
+import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const STATUS = {
   PROCESSING: 'Food Processing',
@@ -46,6 +47,50 @@ const startOfRange = (range) => {
   }
   return null; // ALL = no lower bound
 }
+
+const formatDayLabel = (date) => date.toLocaleDateString('en-US', {month: 'short', day: 'numeric' });
+
+const localDateKey = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+const buildSalesTrend = (orders, days = 7) => {
+  const buckets = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Pre-seed the last N days so the chart shows zero days too
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    buckets.push({
+      key: localDateKey(d),
+      day: formatDayLabel(d),
+      revenue: 0,
+      orders: 0,
+    });
+  }
+
+  const indexByKey = Object.fromEntries(buckets.map((b, i) => [b.key, i]));
+
+  orders.forEach((o) => {
+    const d = new Date(o.date);
+    if (Number.isNaN(d.getTime())) return;
+    const key = d.toISOString().slice(0, 10);
+    const i = indexByKey[key];
+    if (i === undefined) return; // outside the window
+    buckets[i].revenue += o.amount || 0;
+    buckets[i].orders += 1;
+  });
+  
+  return buckets;
+}
+
+
+
 
 
 
@@ -134,6 +179,9 @@ const Dashboard = () => {
     return {count, revenue, pending};
   }, [orders, range]);
 
+  // Sales trend - last 7 days, bucketed daily
+  const salesTrend = useMemo(() => buildSalesTrend(orders, 7), [orders]);
+
   return (
     <div className="dashboard">
       <div className="dash-header">
@@ -172,6 +220,74 @@ const Dashboard = () => {
             <span className="legend-item"><span className="dot orders"></span>Orders</span>
           </span>
         </h3>
+
+        <div className="chart-wrap">
+          {loading ? (
+            <div className="chart-empty">Loading chart…</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={260}>
+              <ComposedChart data={salesTrend} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="revFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="tomato" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="tomato" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+
+                <CartesianGrid stroke="#f0f0f0" vertical={false} />
+                <XAxis
+                  dataKey="day"
+                  tick={{ fontSize: 12, fill: '#888' }}
+                  axisLine={{ stroke: '#e5e5e5' }}
+                  tickLine={false}
+                />
+                <YAxis
+                  yAxisId="left"
+                  tick={{ fontSize: 12, fill: '#888' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => `$${v}`}
+                />
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  tick={{ fontSize: 12, fill: '#888' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    border: '1px solid #eee',
+                    borderRadius: 8,
+                    fontSize: 12,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                  }}
+                  formatter={(value, name) =>
+                    name === 'revenue' ? [`$${value.toLocaleString()}`, 'Revenue'] : [value, 'Orders']
+                  }
+                />
+
+                <Area
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="tomato"
+                  strokeWidth={2.5}
+                  fill="url(#revFill)"
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="orders"
+                  stroke="#2476d2"
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                  activeDot={{ r: 5 }}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          )}
+        </div>
       </div>
 
       <div className="card">
