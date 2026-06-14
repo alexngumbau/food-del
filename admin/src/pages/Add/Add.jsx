@@ -1,94 +1,87 @@
-import { useState } from 'react';
-import { assets } from '../../assets/admin_assets/assets'
-import './Add.css'
+import { useState, useContext, useMemo } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import { StoreContext } from '../../context/StoreContext';
-import { useContext } from 'react';
+import './Add.css';
 
+const STEPS = [
+  { id: 1, label: 'Image' },
+  { id: 2, label: 'Details' },
+  { id: 3, label: 'Category & Price' },
+  { id: 4, label: 'Review' },
+]
+
+const CATEGORIES = [
+  { name: 'Salad',    emoji: '🥗' },
+  { name: 'Rolls',    emoji: '🌯' },
+  { name: 'Deserts',  emoji: '🍰' },
+  { name: 'Sandwich', emoji: '🥪' },
+  { name: 'Cake',     emoji: '🎂' },
+  { name: 'Pure Veg', emoji: '🥬' },
+  { name: 'Pasta',    emoji: '🍝' },
+  { name: 'Noodles',  emoji: '🍜' },
+];
+
+const MAC_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_DESC_CHARS = 240;
+
+const formatBytes = (bytes) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+};
 
 export const Add = () => {
-  const {url, token} = useContext(StoreContext);
+  const { url, token } = useContext(StoreContext);
+  const navigate = useNavigate();
+
+  const [currentStep, setCurrentStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [dragging, setDragging] = useState(false);
 
   const [image, setImage] = useState(null);
   const [data, setData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    category: "Salad"
-  })
+    name: '',
+    description: '',
+    price: '',
+    category: '',
+    availability: 'available',
+  });
 
-  const onChangeHandler = (event) => {
-    const name = event.target.name;
-    const value = event.target.value;
-    setData(data => ({...data, [name]:value}))
-  }
-
-  const onSubmitHandler = async (event) => {
-    event.preventDefault();
-    const formData = new FormData();
-    formData.append("name", data.name);
-    formData.append("description", data.description);
-    formData.append("price", Number(data.price));
-    formData.append("category", data.category);
-    formData.append("image", image);
-    
-    const response = await axios.post(`${url}/api/food/add`, formData , {headers: {token}});
-
-    if (response.data.success) {
-      setData({
-        name: "",
-        description: "",
-        price: "",
-        category: ""
-      });
-      setImage(null);
-      toast.success(response.data.message);
-    } else {
-      toast.error(response.data.message);
-    }
-    
-  }
+  const fillPercent = ((currentStep - 1) / (STEPS.length - 1)) * 100;
 
   return (
     <div className="add">
-      <form onSubmit={onSubmitHandler} className="flex-col">
-        <div className="add-img-upload flex-col">
-          <p>Upload Image</p>
-          <label htmlFor="image">
-            <img src={image ? URL.createObjectURL(image) : assets.upload_area} alt="" />
-          </label>
-          <input onChange={(e) => setImage(e.target.files[0])} type="file" id="image" hidden  required/>
+      {/* Header */}
+      <div className="add-header">
+        <div>
+          <h1>Add Menu Item</h1>
+          <p>Follow the steps to publish a new dish</p>
         </div>
-        <div className="add-product-name flex-col">
-          <p>Product name</p>
-          <input onChange={onChangeHandler} value={data.name} type="text" name='name' placeholder='Type here' />
-        </div>
-        <div className="add-product-description flex-col">
-          <p>Product description</p>
-          <textarea onChange={onChangeHandler} value={data.description}  name="description" rows="6" placeholder='Write content here' required></textarea>
-        </div>
-        <div className="add-category-price">
-          <div className="add-category flex-col">
-            <p>Product category</p>
-            <select onChange={onChangeHandler} value={data.category} name="category" id="">
-              <option value="Salad">Salad</option>
-              <option value="Rolls">Rolls</option>
-              <option value="Deserts">Deserts</option>
-              <option value="Sandwich">Sandwich</option>
-              <option value="Cake">Cake</option>
-              <option value="Pure Veg">Pure Veg</option>
-              <option value="Pasta">Pasta</option>
-              <option value="Noodels">Noodles</option>
-            </select>
+        <button className="btn-ghost" onClick={() => navigate('/list')} >Cancel</button>
+      </div>
+
+      {/* Stepper */}
+      <div className="stepper-card">
+        <div className="stepper">
+          <div className="step-line">
+            <div className="fill" style={{ width: `${fillPercent}%` }} />
           </div>
-          <div className="add-price flex-col">
-            <p>Product price</p>
-            <input onChange={onChangeHandler} value={data.price} type="Number" name='price' placeholder='$20' />
-          </div>
+          {STEPS.map((s) => {
+            const status = currentStep === s.id ? 'active' : currentStep > s.id ? 'done' : '';
+            return (
+              <div key={s.id} className={`step ${status}`}>
+                <div className="dot">{currentStep > s.id ? '✓' : s.id }</div>
+                <div className="label">{s.label}</div>
+              </div>
+            );
+          })}
         </div>
-        <button type='submit' className="add-btn">ADD</button>
-      </form>
+      </div>
+
+
     </div>
+
   )
 }
