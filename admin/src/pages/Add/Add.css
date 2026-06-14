@@ -1,46 +1,118 @@
 .add {
-  width: 70%;
- 
-  margin-top: 50px;
-  color: #6d6d6d;
-  font-size: 16px;
-}
-
-.add form {
-  gap: 20px;
-}
-
-.add-img-upload img {
-  width: 120px;
-}
-
-.add-img-upload label {
-  width: 120px;
-}
-
-.add-product-name, .add-product-description {
-  width: max(40%, 280px);
-}
-
-.add.product-name input, .add-product-description textarea {
-  padding: 10px;
-}
-
-.add-category-price {
   display: flex;
-  gap: 30px;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0px 16px
 }
 
-.add-category-price select, .add-category-price input {
-  max-width: 120px;
-  padding: 10px;
+.add-header {
+  background: white;
+  padding: 20px 24px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.add-btn {
-  max-width: 120px;
-  border: none;
-  background-color: black;
-  color: white;
-  padding: 10px;
+.add-header h1 { font-size: 20px; margin-bottom: 4px; }
+.add-header p { color: #888; font-size: 13px; }
+
+.btn-ghost {
+  padding: 9px 16px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
+  color: #555;
+}
+
+.btn-ghost:disbaled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.stepper-card {
+  background: white;
+  padding: 22px 28px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.stepper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  position: relative;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 2;
+}
+
+.step .dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f1f3f5;
+  color: #888;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #f1f3f5;
+  transition: all 0.2s ease;
+}
+
+
+
+.step.active .dot {
+  background: tomato;
+  color: white;
+  border-color: tomato;
+  box-shadow: 0 0 0 4px rgba(255,99, 71, 0.15);
+}
+
+.step .label {
+  font-size: 12px;
+  color: #888;
+  font-weight: 600;
+}
+
+.step.active .label {
+  color: tomato;
+}
+
+.step.done .dot {
+  background: #e5f8ed;
+  color: #2bb673;
+  border-color: #2bb673;
+}
+
+.step.done .label {
+  color: #2bb673;
+}
+
+.step-line {
+  position: absolute;
+  top: 18px;
+  left: 12.5%;
+  right: 12.5%;
+  height: 2px;
+  background: #f1f3f5;
+  z-index: 1;
+}
+
+.step-line .fill {
+  height: 100%;
+  background: #2bb673;
+  width: 0%;
+  transition: width 0.3s ease;
 }
