@@ -23,7 +23,7 @@ const CATEGORIES = [
   { name: 'Noodles',  emoji: '🍜' },
 ];
 
-const MAC_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_DESC_CHARS = 240;
 
 const formatBytes = (bytes) => {
@@ -48,6 +48,30 @@ export const Add = () => {
     category: '',
     availability: 'available',
   });
+  
+  const imagePreview = useMemo(
+    () => (image ? URL.createObjectURL(image) : null),
+    [image]
+  );
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    setDragging(false);
+    handleFile(e.dataTransfer.files[0]);
+  }
+
+  const handleFile = (file) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast.error('Image must be 5MB or smaller');
+      return;
+    }
+    setImage(file)
+  }
 
   const fillPercent = ((currentStep - 1) / (STEPS.length - 1)) * 100;
 
@@ -80,8 +104,69 @@ export const Add = () => {
         </div>
       </div>
 
+      {/* Body */}
+      <div className="body-card">
+        {currentStep === 1 && (
+          <Step1Image 
+            image={image}
+            imagePreview={imagePreview}
+            dragging={dragging}
+            setDragging={setDragging}
+            onDrop={onDrop}
+            onFile={handleFile}
+            onClear={() => setImage(null)}
+          />
+        )}
+      </div>
+
 
     </div>
 
-  )
-}
+  );
+};
+
+
+const Step1Image = ({image, imagePreview, dragging, setDragging, onDrop, onFile, onClear}) => (
+  <>
+    <div className="title">Upload product image</div>
+    <div className="subtitle">A bright, square photo of the dish helps customers decide faster.</div>
+
+    <label 
+      htmlFor="image"
+      className={`hero-drop ${dragging ? 'dragging' : ''} ${image ? 'has-image' : ''}`}
+      onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+      onDragLeave={() => setDragging(false)}
+      onDrop={onDrop}
+    >
+      {image ? (
+        <img className="preview-image" src={imagePreview} alt="preview" />
+      ) : (
+        <>
+          <div className="hero-icon">↑</div>
+          <h2>Drag and drop your photo here</h2>
+          <p>Or browse files from your computer. A clean background and natural light work best.</p>
+         
+        </>
+      )}
+    </label>
+    <input 
+      id="image"
+      type="file"
+      accept="image/*"
+      hidden
+      onChange={(e) => onFile(e.target.files?.[0])}
+    />
+
+    {image && (
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12 }}>
+        <button className="link-btn muted" type="button" onClick={onClear}>Remove image</button>
+      </div>
+    )}
+
+    <div className="meta-row">
+      <span><span className="dot"></span> PNG, JPG, WEBP</span>
+      <span><span className="dot"></span> Max 5MB</span>
+      <span><span className="dot"></span> Recommended 800x800</span>
+    </div>
+  </>
+)
