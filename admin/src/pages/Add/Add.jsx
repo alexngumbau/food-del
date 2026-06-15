@@ -60,6 +60,12 @@ export const Add = () => {
     handleFile(e.dataTransfer.files[0]);
   }
 
+  const onChangeHandler = (e) => {
+    const { name, value } = e.target;
+    if ( name === 'description' && value.length > MAX_DESC_CHARS ) return;
+    setData((prev) => ({ ...prev, [name]: value }));
+  }
+
   const handleFile = (file) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
@@ -71,6 +77,48 @@ export const Add = () => {
       return;
     }
     setImage(file)
+  }
+
+  const goBack = () => setCurrentStep((s) => Math.max(1, s-1));
+  const goNext = () => setCurrentStep((s) => Math.min(4, s+1));
+
+  const canContinue = () => {
+    if (currentStep === 1) return !!image;
+    if (currentStep === 2) return data.name.trim() && data.description.trim();
+    if (currentStep === 3) return data.category && Number(data.price) > 0;
+    return true;
+  }
+
+  const onSubmit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('name', data.name);
+      formData.append('description', data.description);
+      formData.append('price', data.price);
+      formData.append('category', data.category);
+      formData.append('image', image);
+
+      const res = await axios.post(`${url}/api/food/add`, formData, {headers: {token}});
+      if (res.data.success) {
+        toast.success(res.data.message);
+
+        // Reset
+        setData({name: '', description: '', price: '', category: 'Salad', availability: 'available' })
+        setImage(null);
+        setCurrentStep(1);
+        navigate('/list');
+      } else {
+        toast.error(res.data.message);
+      }
+    } catch (err) {
+      console.log(err);
+      
+      toast.error('Failed to publish item.');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const fillPercent = ((currentStep - 1) / (STEPS.length - 1)) * 100;
@@ -117,7 +165,42 @@ export const Add = () => {
             onClear={() => setImage(null)}
           />
         )}
+
+        {currentStep === 2 && (
+          <Step2Details
+            data={data}
+            image={image}
+            imagePreview={imagePreview}
+            onChange={onChangeHandler}
+            onReplace={(f) => handleFile(f)}
+            onRemove={() => setImage(null)}
+          />
+        )}
+
+        {/* Footer */}
+        <div className="step-footer">
+          <div className="step-progress">Step {currentStep} of {STEPS.length}</div>
+          <div className="step-actions">
+            <button className="btn-ghost" onClick={goBack} disabled={currentStep === 1}>
+              ← Back
+            </button>
+            {currentStep < 4 ? (
+              <button className="btn-primary" onClick={goNext} disabled={!canContinue()}> 
+                Continue →
+              </button>
+            ) : (
+              <button className="btn-publish" onClick={onSubmit} disabled={submitting}>
+                {submitting ? 'Publishing...' : '✓ Publish Item'}
+              </button>
+            )}
+          </div>
+        </div>
+
+
       </div>
+
+      
+      
 
 
     </div>
@@ -125,7 +208,7 @@ export const Add = () => {
   );
 };
 
-
+// Step 1: Image
 const Step1Image = ({image, imagePreview, dragging, setDragging, onDrop, onFile, onClear}) => (
   <>
     <div className="title">Upload product image</div>
@@ -168,5 +251,59 @@ const Step1Image = ({image, imagePreview, dragging, setDragging, onDrop, onFile,
       <span><span className="dot"></span> Max 5MB</span>
       <span><span className="dot"></span> Recommended 800x800</span>
     </div>
+  </>
+)
+
+// Step 2: Details
+const Step2Details = ({ data, image, imagePreview, onChange, onReplace, onRemove }) => (
+  <>
+    <div className="title">Tell us about the dish</div>
+    <div className="subtitle">A clear name and appetizing description help your item stand out.</div>
+
+    {image && (
+      <div className="uploaded-strip">
+        <img src={imagePreview} className="thumb" />
+        <div className="info">
+          <strong>{image.name}</strong>
+          <span>{formatBytes(image.size)}</span>
+        </div>
+        <div className="actions">
+          <label htmlFor="image-replace" className="link-btn" style={{ cursor: 'pointer' }}>Replace</label>
+          <input
+            id="image-replace"
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(e) => onReplace(e.target.files?.[0])}
+          />
+          <button className="link-btn muted" onClick={onRemove}>Remove</button>
+        </div>
+      </div>
+    )}
+
+    <div className="form-grid">
+      <div className="form-row">
+        <label>Product Name</label>
+        <input
+          type="text"
+          name="name"
+          value={data.name}
+          onChange={onChange}
+          placeholder="e.g. Margherita Pizza"
+        />
+        <span className="hint">Keep it short and recognizable.</span>
+      </div>
+      <div className="form-row">
+        <label>Product description</label>
+        <textarea
+          name="description"
+          value={data.description}
+          onChange={onChange}
+          placeholder="Write a short, appetizing description..."
+        />
+        <div className="char-count">{data.description.length} / {MAX_DESC_CHARS}</div>
+      </div>
+    </div>
+
   </>
 )
