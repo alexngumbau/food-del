@@ -36,7 +36,7 @@ export const Add = () => {
   const { url, token } = useContext(StoreContext);
   const navigate = useNavigate();
 
-  const [currentStep, setCurrentStep] = useState(4);
+  const [currentStep, setCurrentStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [dragging, setDragging] = useState(false);
 
@@ -58,6 +58,12 @@ export const Add = () => {
     e.preventDefault();
     setDragging(false);
     handleFile(e.dataTransfer.files[0]);
+  }
+
+  const onChangeHandler = (e) => {
+    const { name, value } = e.target;
+    if ( name === 'description' && value.length > MAX_DESC_CHARS ) return;
+    setData((prev) => ({ ...prev, [name]: value }));
   }
 
   const handleFile = (file) => {
@@ -160,6 +166,17 @@ export const Add = () => {
           />
         )}
 
+        {currentStep === 2 && (
+          <Step2Details
+            data={data}
+            image={image}
+            imagePreview={imagePreview}
+            onChange={onChangeHandler}
+            onReplace={(f) => handleFile(f)}
+            onRemove={() => setImage(null)}
+          />
+        )}
+
         {/* Footer */}
         <div className="step-footer">
           <div className="step-progress">Step {currentStep} of {STEPS.length}</div>
@@ -191,7 +208,7 @@ export const Add = () => {
   );
 };
 
-
+// Step 1: Image
 const Step1Image = ({image, imagePreview, dragging, setDragging, onDrop, onFile, onClear}) => (
   <>
     <div className="title">Upload product image</div>
@@ -234,5 +251,59 @@ const Step1Image = ({image, imagePreview, dragging, setDragging, onDrop, onFile,
       <span><span className="dot"></span> Max 5MB</span>
       <span><span className="dot"></span> Recommended 800x800</span>
     </div>
+  </>
+)
+
+// Step 2: Details
+const Step2Details = ({ data, image, imagePreview, onChange, onReplace, onRemove }) => (
+  <>
+    <div className="title">Tell us about the dish</div>
+    <div className="subtitle">A clear name and appetizing description help your item stand out.</div>
+
+    {image && (
+      <div className="uploaded-strip">
+        <img src={imagePreview} className="thumb" />
+        <div className="info">
+          <strong>{image.name}</strong>
+          <span>{formatBytes(image.size)}</span>
+        </div>
+        <div className="actions">
+          <label htmlFor="image-replace" className="link-btn" style={{ cursor: 'pointer' }}>Replace</label>
+          <input
+            id="image-replace"
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(e) => onReplace(e.target.files?.[0])}
+          />
+          <button className="link-btn muted" onClick={onRemove}>Remove</button>
+        </div>
+      </div>
+    )}
+
+    <div className="form-grid">
+      <div className="form-row">
+        <label>Product Name</label>
+        <input
+          type="text"
+          name="name"
+          value={data.name}
+          onChange={onChange}
+          placeholder="e.g. Margherita Pizza"
+        />
+        <span className="hint">Keep it short and recognizable.</span>
+      </div>
+      <div className="form-row">
+        <label>Product description</label>
+        <textarea
+          name="description"
+          value={data.description}
+          onChange={onChange}
+          placeholder="Write a short, appetizing description..."
+        />
+        <div className="char-count">{data.description.length} / {MAX_DESC_CHARS}</div>
+      </div>
+    </div>
+
   </>
 )
