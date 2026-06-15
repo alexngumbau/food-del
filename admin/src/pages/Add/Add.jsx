@@ -10,7 +10,7 @@ const STEPS = [
   { id: 2, label: 'Details' },
   { id: 3, label: 'Category & Price' },
   { id: 4, label: 'Review' },
-]
+];
 
 const CATEGORIES = [
   { name: 'Salad',    emoji: '🥗' },
@@ -29,7 +29,7 @@ const MAX_DESC_CHARS = 240;
 const formatBytes = (bytes) => {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 };
 
 export const Add = () => {
@@ -45,26 +45,25 @@ export const Add = () => {
     name: '',
     description: '',
     price: '',
-    category: '',
+    category: 'Salad',
     availability: 'available',
   });
-  
+
   const imagePreview = useMemo(
     () => (image ? URL.createObjectURL(image) : null),
     [image]
   );
 
-  const onDrop = (e) => {
-    e.preventDefault();
-    setDragging(false);
-    handleFile(e.dataTransfer.files[0]);
-  }
+  const selectedCategory = useMemo(
+    () => CATEGORIES.find((c) => c.name === data.category) || CATEGORIES[0],
+    [data.category]
+  );
 
   const onChangeHandler = (e) => {
     const { name, value } = e.target;
-    if ( name === 'description' && value.length > MAX_DESC_CHARS ) return;
+    if (name === 'description' && value.length > MAX_DESC_CHARS) return;
     setData((prev) => ({ ...prev, [name]: value }));
-  }
+  };
 
   const handleFile = (file) => {
     if (!file) return;
@@ -76,18 +75,25 @@ export const Add = () => {
       toast.error('Image must be 5MB or smaller');
       return;
     }
-    setImage(file)
-  }
+    setImage(file);
+  };
 
-  const goBack = () => setCurrentStep((s) => Math.max(1, s-1));
-  const goNext = () => setCurrentStep((s) => Math.min(4, s+1));
+  const onDrop = (e) => {
+    e.preventDefault();
+    setDragging(false);
+    handleFile(e.dataTransfer.files?.[0]);
+  };
 
+  // Validation per step
   const canContinue = () => {
     if (currentStep === 1) return !!image;
     if (currentStep === 2) return data.name.trim() && data.description.trim();
     if (currentStep === 3) return data.category && Number(data.price) > 0;
     return true;
-  }
+  };
+
+  const goNext = () => setCurrentStep((s) => Math.min(4, s + 1));
+  const goBack = () => setCurrentStep((s) => Math.max(1, s - 1));
 
   const onSubmit = async () => {
     if (submitting) return;
@@ -96,16 +102,17 @@ export const Add = () => {
       const formData = new FormData();
       formData.append('name', data.name);
       formData.append('description', data.description);
-      formData.append('price', data.price);
+      formData.append('price', Number(data.price));
       formData.append('category', data.category);
       formData.append('image', image);
 
-      const res = await axios.post(`${url}/api/food/add`, formData, {headers: {token}});
+      const res = await axios.post(`${url}/api/food/add`, formData, {
+        headers: { token },
+      });
       if (res.data.success) {
         toast.success(res.data.message);
-
         // Reset
-        setData({name: '', description: '', price: '', category: 'Salad', availability: 'available' })
+        setData({ name: '', description: '', price: '', category: 'Salad', availability: 'available' });
         setImage(null);
         setCurrentStep(1);
         navigate('/list');
@@ -113,14 +120,13 @@ export const Add = () => {
         toast.error(res.data.message);
       }
     } catch (err) {
-      console.log(err);
-      
-      toast.error('Failed to publish item.');
+      toast.error('Failed to publish item');
     } finally {
       setSubmitting(false);
     }
-  }
+  };
 
+  // Step-line fill progress: 0% → 33% → 66% → 100%
   const fillPercent = ((currentStep - 1) / (STEPS.length - 1)) * 100;
 
   return (
@@ -131,20 +137,18 @@ export const Add = () => {
           <h1>Add Menu Item</h1>
           <p>Follow the steps to publish a new dish</p>
         </div>
-        <button className="btn-ghost" onClick={() => navigate('/list')} >Cancel</button>
+        <button className="btn-ghost" onClick={() => navigate('/list')}>Cancel</button>
       </div>
 
       {/* Stepper */}
       <div className="stepper-card">
         <div className="stepper">
-          <div className="step-line">
-            <div className="fill" style={{ width: `${fillPercent}%` }} />
-          </div>
+          <div className="step-line"><div className="fill" style={{ width: `${fillPercent}%` }} /></div>
           {STEPS.map((s) => {
             const status = currentStep === s.id ? 'active' : currentStep > s.id ? 'done' : '';
             return (
               <div key={s.id} className={`step ${status}`}>
-                <div className="dot">{currentStep > s.id ? '✓' : s.id }</div>
+                <div className="dot">{currentStep > s.id ? '✓' : s.id}</div>
                 <div className="label">{s.label}</div>
               </div>
             );
@@ -155,7 +159,7 @@ export const Add = () => {
       {/* Body */}
       <div className="body-card">
         {currentStep === 1 && (
-          <Step1Image 
+          <Step1Image
             image={image}
             imagePreview={imagePreview}
             dragging={dragging}
@@ -177,6 +181,24 @@ export const Add = () => {
           />
         )}
 
+        {currentStep === 3 && (
+          <Step3CategoryPrice
+            data={data}
+            onChange={onChangeHandler}
+            onPickCategory={(name) => setData((p) => ({ ...p, category: name }))}
+          />
+        )}
+
+        {currentStep === 4 && (
+          <Step4Review
+            data={data}
+            image={image}
+            imagePreview={imagePreview}
+            selectedCategory={selectedCategory}
+            onEdit={(step) => setCurrentStep(step)}
+          />
+        )}
+
         {/* Footer */}
         <div className="step-footer">
           <div className="step-progress">Step {currentStep} of {STEPS.length}</div>
@@ -185,36 +207,28 @@ export const Add = () => {
               ← Back
             </button>
             {currentStep < 4 ? (
-              <button className="btn-primary" onClick={goNext} disabled={!canContinue()}> 
+              <button className="btn-primary" onClick={goNext} disabled={!canContinue()}>
                 Continue →
               </button>
             ) : (
               <button className="btn-publish" onClick={onSubmit} disabled={submitting}>
-                {submitting ? 'Publishing...' : '✓ Publish Item'}
+                {submitting ? 'Publishing…' : '✓ Publish Item'}
               </button>
             )}
           </div>
         </div>
-
-
       </div>
-
-      
-      
-
-
     </div>
-
   );
 };
 
-// Step 1: Image
-const Step1Image = ({image, imagePreview, dragging, setDragging, onDrop, onFile, onClear}) => (
+/* ---------- Step 1: Image ---------- */
+const Step1Image = ({ image, imagePreview, dragging, setDragging, onDrop, onFile, onClear }) => (
   <>
     <div className="title">Upload product image</div>
     <div className="subtitle">A bright, square photo of the dish helps customers decide faster.</div>
 
-    <label 
+    <label
       htmlFor="image"
       className={`hero-drop ${dragging ? 'dragging' : ''} ${image ? 'has-image' : ''}`}
       onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
@@ -228,11 +242,13 @@ const Step1Image = ({image, imagePreview, dragging, setDragging, onDrop, onFile,
           <div className="hero-icon">↑</div>
           <h2>Drag and drop your photo here</h2>
           <p>Or browse files from your computer. A clean background and natural light work best.</p>
-         
+          <div className="hero-buttons">
+            <span className="btn-primary">Browse files</span>
+          </div>
         </>
       )}
     </label>
-    <input 
+    <input
       id="image"
       type="file"
       accept="image/*"
@@ -249,12 +265,12 @@ const Step1Image = ({image, imagePreview, dragging, setDragging, onDrop, onFile,
     <div className="meta-row">
       <span><span className="dot"></span> PNG, JPG, WEBP</span>
       <span><span className="dot"></span> Max 5MB</span>
-      <span><span className="dot"></span> Recommended 800x800</span>
+      <span><span className="dot"></span> Recommended 800×800</span>
     </div>
   </>
-)
+);
 
-// Step 2: Details
+/* ---------- Step 2: Details ---------- */
 const Step2Details = ({ data, image, imagePreview, onChange, onReplace, onRemove }) => (
   <>
     <div className="title">Tell us about the dish</div>
@@ -262,7 +278,7 @@ const Step2Details = ({ data, image, imagePreview, onChange, onReplace, onRemove
 
     {image && (
       <div className="uploaded-strip">
-        <img src={imagePreview} className="thumb" />
+        <img className="thumb" src={imagePreview} alt="" />
         <div className="info">
           <strong>{image.name}</strong>
           <span>{formatBytes(image.size)}</span>
@@ -283,7 +299,7 @@ const Step2Details = ({ data, image, imagePreview, onChange, onReplace, onRemove
 
     <div className="form-grid">
       <div className="form-row">
-        <label>Product Name</label>
+        <label>Product name</label>
         <input
           type="text"
           name="name"
@@ -291,7 +307,7 @@ const Step2Details = ({ data, image, imagePreview, onChange, onReplace, onRemove
           onChange={onChange}
           placeholder="e.g. Margherita Pizza"
         />
-        <span className="hint">Keep it short and recognizable.</span>
+        <span className="hint">Keep it short and recognizable</span>
       </div>
       <div className="form-row">
         <label>Product description</label>
@@ -301,9 +317,131 @@ const Step2Details = ({ data, image, imagePreview, onChange, onReplace, onRemove
           onChange={onChange}
           placeholder="Write a short, appetizing description..."
         />
-        <div className="char-count">{data.description.length} / {MAX_DESC_CHARS}</div>
+        <div className="char-count">{data.description.length} / {MAX_DESC_CHARS} characters</div>
       </div>
     </div>
-
   </>
-)
+);
+
+/* ---------- Step 3: Category & Price ---------- */
+const Step3CategoryPrice = ({ data, onChange, onPickCategory }) => (
+  <>
+    <div className="title">Choose a category and set price</div>
+    <div className="subtitle">Pick the menu section this item belongs to and the price customers will pay.</div>
+
+    <div className="form-grid">
+      <div className="form-row">
+        <label>Category</label>
+        <div className="category-grid">
+          {CATEGORIES.map((c) => (
+            <div
+              key={c.name}
+              className={`cat-tile ${data.category === c.name ? 'selected' : ''}`}
+              onClick={() => onPickCategory(c.name)}
+            >
+              <div className="emoji">{c.emoji}</div>
+              <div className="name">{c.name}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="two-col">
+        <div className="form-row">
+          <label>Price</label>
+          <div className="price-input">
+            <input
+              type="number"
+              name="price"
+              min="0"
+              value={data.price}
+              onChange={onChange}
+              placeholder="20"
+            />
+          </div>
+          <span className="hint">Set in your store's base currency</span>
+        </div>
+        <div className="form-row">
+          <label>Availability</label>
+          <select name="availability" value={data.availability} onChange={onChange}>
+            <option value="available">Available now</option>
+            <option value="hidden">Hidden</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </>
+);
+
+/* ---------- Step 4: Review ---------- */
+const Step4Review = ({ data, image, imagePreview, selectedCategory, onEdit }) => (
+  <>
+    <div className="title">Review and publish</div>
+    <div className="subtitle">Double-check everything looks right. You can edit any section before publishing.</div>
+
+    <div className="review-grid">
+      <div>
+        <div className="preview-label">Storefront preview</div>
+        <div className="food-card">
+          <div className="photo">
+            {imagePreview
+              ? <img src={imagePreview} alt={data.name} />
+              : <span style={{ fontSize: 56 }}>{selectedCategory.emoji}</span>}
+          </div>
+          <div className="body">
+            <span className="category-pill">{data.category}</span>
+            <div className="top">
+              <div className="name">{data.name || 'Untitled item'}</div>
+              <div className="rating">★★★★★</div>
+            </div>
+            <div className="desc">{data.description || 'No description provided.'}</div>
+            <div className="bottom">
+              <div className="price">${Number(data.price || 0).toFixed(0)}</div>
+              <button className="cta" type="button">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div className="preview-label">Item summary</div>
+        <div className="summary-block">
+          <div className="summary-section">
+            <div className="summary-head">
+              <h4>Image</h4>
+              <button className="edit-link" onClick={() => onEdit(1)}>Edit</button>
+            </div>
+            <div className="kv"><div className="k">File</div><div className="v">{image?.name || '—'}</div></div>
+            <div className="kv"><div className="k">Size</div><div className="v">{image ? formatBytes(image.size) : '—'}</div></div>
+          </div>
+          <div className="summary-section">
+            <div className="summary-head">
+              <h4>Details</h4>
+              <button className="edit-link" onClick={() => onEdit(2)}>Edit</button>
+            </div>
+            <div className="kv"><div className="k">Name</div><div className="v">{data.name || '—'}</div></div>
+            <div className="kv"><div className="k">Description</div><div className="v">{data.description || '—'}</div></div>
+          </div>
+          <div className="summary-section">
+            <div className="summary-head">
+              <h4>Category & Price</h4>
+              <button className="edit-link" onClick={() => onEdit(3)}>Edit</button>
+            </div>
+            <div className="kv"><div className="k">Category</div><div className="v">{data.category}</div></div>
+            <div className="kv"><div className="k">Price</div><div className="v" style={{ color: 'tomato', fontWeight: 700 }}>${Number(data.price || 0).toFixed(2)}</div></div>
+            <div className="kv"><div className="k">Availability</div><div className="v" style={{ color: data.availability === 'available' ? '#2bb673' : '#888' }}>● {data.availability === 'available' ? 'Available now' : 'Hidden'}</div></div>
+          </div>
+        </div>
+
+        <div className="notice">
+          <div className="ic">!</div>
+          <div>
+            <h4>Once published, this item appears on the storefront immediately</h4>
+            <p>You can hide or edit it from the List Items page at any time.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </>
+);
+
+export default Add;
