@@ -36,7 +36,7 @@ export const Add = () => {
   const { url, token } = useContext(StoreContext);
   const navigate = useNavigate();
 
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(4);
   const [submitting, setSubmitting] = useState(false);
   const [dragging, setDragging] = useState(false);
 
@@ -71,6 +71,48 @@ export const Add = () => {
       return;
     }
     setImage(file)
+  }
+
+  const goBack = () => setCurrentStep((s) => Math.max(1, s-1));
+  const goNext = () => setCurrentStep((s) => Math.min(4, s+1));
+
+  const canContinue = () => {
+    if (currentStep === 1) return !!image;
+    if (currentStep === 2) return data.name.trim() && data.description.trim();
+    if (currentStep === 3) return data.category && Number(data.price) > 0;
+    return true;
+  }
+
+  const onSubmit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('name', data.name);
+      formData.append('description', data.description);
+      formData.append('price', data.price);
+      formData.append('category', data.category);
+      formData.append('image', image);
+
+      const res = await axios.post(`${url}/api/food/add`, formData, {headers: {token}});
+      if (res.data.success) {
+        toast.success(res.data.message);
+
+        // Reset
+        setData({name: '', description: '', price: '', category: 'Salad', availability: 'available' })
+        setImage(null);
+        setCurrentStep(1);
+        navigate('/list');
+      } else {
+        toast.error(res.data.message);
+      }
+    } catch (err) {
+      console.log(err);
+      
+      toast.error('Failed to publish item.');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const fillPercent = ((currentStep - 1) / (STEPS.length - 1)) * 100;
@@ -117,7 +159,31 @@ export const Add = () => {
             onClear={() => setImage(null)}
           />
         )}
+
+        {/* Footer */}
+        <div className="step-footer">
+          <div className="step-progress">Step {currentStep} of {STEPS.length}</div>
+          <div className="step-actions">
+            <button className="btn-ghost" onClick={goBack} disabled={currentStep === 1}>
+              ← Back
+            </button>
+            {currentStep < 4 ? (
+              <button className="btn-primary" onClick={goNext} disabled={!canContinue()}> 
+                Continue →
+              </button>
+            ) : (
+              <button className="btn-publish" onClick={onSubmit} disabled={submitting}>
+                {submitting ? 'Publishing...' : '✓ Publish Item'}
+              </button>
+            )}
+          </div>
+        </div>
+
+
       </div>
+
+      
+      
 
 
     </div>

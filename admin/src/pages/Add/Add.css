@@ -34,6 +34,38 @@
   cursor: not-allowed;
 }
 
+.btn-primary {
+  padding: 9px 18px;
+  background: tomato;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary:disabled {
+  background: #f1d3cc;
+  cursor: not-allowed;
+}
+
+.btn-publish {
+  padding: 9px 22px;
+  background: #2bb673;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-publish:hover {
+  background: #239b62;
+}
+
+/* Stepper */
 .stepper-card {
   background: white;
   padding: 22px 28px;
@@ -70,8 +102,6 @@
   border: 2px solid #f1f3f5;
   transition: all 0.2s ease;
 }
-
-
 
 .step.active .dot {
   background: tomato;
@@ -138,7 +168,27 @@
   margin-bottom: 24px;
 }
 
-/* Step  */
+/* Footer */
+.step-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.step-progress {
+  font-size: 12px;
+  color: #888;
+}
+
+.step-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Step 1: Hero dropzone  */
 .hero-drop {
   border: 2px dashed #f0d0c5;
   display: flex;
