@@ -1,28 +1,46 @@
-.list-table-format {
-  display: grid;
-  grid-template-columns: 0.5fr 2fr 1fr 1fr 0.5fr;
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0 16px;
+}
+
+.list-header {
+  background: white;
+  padding: 20px 24px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  padding: 12px 15px;
-  font-size: 13px;
-  border: 1px solid #cacaca;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.list-table-format title {
-  background-color: #f9f9f9;
+.list-header h1 { font-size: 20px; margin-bottom: 4px; }
+.list-header p  { color: #888; font-size: 13px; }
+
+.btn-primary {
+  padding: 9px 16px; background: tomato; color: white;
+  border: none; border-radius: 8px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
 }
 
-.list-table-format img {
-  width: 50px;
+.btn-primary:hover { background: #ff5733; }
+
+.btn-ghost {
+  padding: 8px 14px; background: white;
+  border: 1px solid #e0e0e0; border-radius: 8px;
+  font-size: 13px; font-weight: 600; cursor: pointer; color: #555;
+}
+.btn-ghost:hover { background: #fafafa; }
+
+
+/* Stats strip */
+.list-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 }
 
-@media (max-width: 600px) {
-  .list-table-format {
-    grid-template-columns: 1fr 3fr 1fr;
-    gap: 15px;
-  }
-
-  .list-table-format.title {
-    display: none;
-  }
+.stat.unavailable .value {
+  color: tomato;
 }
