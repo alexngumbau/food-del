@@ -1,3 +1,4 @@
+/* Page wrapper */
 .list {
   display: flex;
   flex-direction: column;
@@ -5,6 +6,7 @@
   padding: 0 16px;
 }
 
+/* Header */
 .list-header {
   background: white;
   padding: 20px 24px;
@@ -12,20 +14,18 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
-
 .list-header h1 { font-size: 20px; margin-bottom: 4px; }
 .list-header p  { color: #888; font-size: 13px; }
 
+/* Buttons (shared, consider lifting to a global stylesheet later) */
 .btn-primary {
   padding: 9px 16px; background: tomato; color: white;
   border: none; border-radius: 8px;
   font-size: 13px; font-weight: 600; cursor: pointer;
 }
-
 .btn-primary:hover { background: #ff5733; }
-
 .btn-ghost {
   padding: 8px 14px; background: white;
   border: 1px solid #e0e0e0; border-radius: 8px;
@@ -33,14 +33,193 @@
 }
 .btn-ghost:hover { background: #fafafa; }
 
-
 /* Stats strip */
-.list-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+.list-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.stat {
+  background: white; padding: 16px 20px; border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.stat .label {
+  font-size: 12px; color: #888;
+  text-transform: uppercase; letter-spacing: 0.4px;
+}
+.stat .value { font-size: 22px; font-weight: 700; margin-top: 4px; }
+.stat.unavailable .value { color: tomato; }
+
+/* Toolbar */
+.toolbar {
+  background: white; padding: 14px 18px; border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; flex-wrap: wrap;
+}
+.toolbar-left  { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.toolbar-right { display: flex; gap: 8px; }
+
+.search {
+  padding: 8px 14px 8px 36px;
+  border: 1px solid #e0e0e0; border-radius: 8px;
+  background: white url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.3-4.3'/></svg>") no-repeat 12px center;
+  font-size: 13px; min-width: 240px; outline: none;
+}
+.search:focus { border-color: tomato; box-shadow: 0 0 0 3px rgba(255,99,71,0.12); }
+.select {
+  padding: 8px 12px; border: 1px solid #e0e0e0; border-radius: 8px;
+  background: white; font-size: 13px; cursor: pointer; outline: none;
 }
 
-.stat.unavailable .value {
-  color: tomato;
+/* Bulk action banner */
+.bulk-banner {
+  background: #fff7f4; border: 1px solid #ffd6cc;
+  padding: 12px 18px; border-radius: 12px;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 10px;
+}
+.bulk-banner .left {
+  font-size: 13px; color: #6a3a30;
+  display: flex; align-items: center; gap: 12px;
+}
+.bulk-banner .left strong { color: tomato; }
+.bulk-banner .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.bulk-banner button {
+  padding: 6px 12px; border-radius: 6px;
+  border: 1px solid #ffd6cc; background: white;
+  font-size: 12px; font-weight: 600; cursor: pointer; color: tomato;
+}
+.bulk-banner button:hover { background: tomato; color: white; }
+
+/* Table card */
+.table-card {
+  background: white; border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); overflow: hidden;
+}
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td {
+  padding: 12px 16px; text-align: left;
+  font-size: 13px; border-bottom: 1px solid #f5f5f5;
+}
+.table th {
+  background: #fafbfc; color: #888;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+  font-weight: 700; border-bottom: 1px solid #f0f0f0;
+  user-select: none;
+}
+.table th.sortable { cursor: pointer; }
+.table th.sortable:hover { color: #555; }
+.table th .sort { color: tomato; margin-left: 4px; font-size: 10px; }
+.table tbody tr { transition: background 0.15s ease; }
+.table tbody tr:hover { background: #fafafa; }
+.table tbody tr.selected { background: #fff7f4; }
+.table tbody tr:last-child td { border-bottom: none; }
+
+/* Checkbox */
+.check {
+  width: 16px; height: 16px;
+  border: 1.5px solid #ccc; border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: white; font-size: 10px; font-weight: 700;
+  transition: all 0.15s ease;
+}
+.check:hover { border-color: tomato; }
+.check.checked { background: tomato; border-color: tomato; color: white; }
+
+/* Item cell */
+.item-cell { display: flex; align-items: center; gap: 10px; }
+.thumb {
+  width: 38px; height: 38px; border-radius: 6px;
+  object-fit: cover; background: #f1f3f5; flex-shrink: 0;
+}
+.item-name { font-weight: 600; color: #222; }
+.item-id   { font-size: 11px; color: #aaa; font-family: ui-monospace, monospace; }
+
+/* Category pills (colored per category) */
+.category-pill {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+  background: #f1f3f5; color: #555;
+}
+.category-pill.salad    { background: #e5f8ed; color: #2bb673; }
+.category-pill.rolls    { background: #fff4e5; color: #e08a00; }
+.category-pill.deserts  { background: #fff0ed; color: tomato; }
+.category-pill.sandwich { background: #fff9e0; color: #b58900; }
+.category-pill.cake     { background: #f8e8ff; color: #a020f0; }
+.category-pill.pure-veg { background: #e8f5e9; color: #388e3c; }
+.category-pill.pasta    { background: #e5f1ff; color: #2476d2; }
+.category-pill.noodles  { background: #fff1e0; color: #d2691e; }
+
+.price { font-weight: 700; color: #222; }
+
+/* Availability */
+.availability {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #2bb673; font-weight: 600;
+}
+.availability.off { color: #999; }
+.dot-status { width: 8px; height: 8px; border-radius: 50%; background: #2bb673; }
+.availability.off .dot-status { background: #ccc; }
+
+/* Toggle switch */
+.switch {
+  width: 32px; height: 18px; background: #2bb673;
+  border-radius: 20px; position: relative; cursor: pointer;
+  display: inline-block; border: none;
+  transition: background 0.2s ease;
+}
+.switch::after {
+  content: ''; position: absolute; right: 2px; top: 2px;
+  width: 14px; height: 14px; background: white;
+  border-radius: 50%; transition: all 0.2s ease;
+}
+.switch.off { background: #ccc; }
+.switch.off::after { right: auto; left: 2px; }
+
+/* Row actions */
+.row-actions { display: flex; gap: 4px; justify-content: flex-end; }
+.icon-btn {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: transparent; border: none; cursor: pointer;
+  font-size: 13px; color: #888;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.icon-btn:hover { background: #f1f3f5; color: #222; }
+.icon-btn.delete:hover { background: #fff0ed; color: tomato; }
+
+/* Footer */
+.table-footer {
+  padding: 12px 18px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid #f0f0f0;
+  font-size: 12px; color: #666;
+  flex-wrap: wrap; gap: 10px;
+}
+.page-controls { display: flex; gap: 6px; align-items: center; }
+.page-btn {
+  width: 28px; height: 28px; border-radius: 6px;
+  border: 1px solid #eee; background: white;
+  cursor: pointer; font-size: 12px;
+}
+.page-btn:hover:not(:disabled) { border-color: tomato; color: tomato; }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.page-btn.active   { background: tomato; color: white; border-color: tomato; }
+
+/* Empty state */
+.empty-state {
+  padding: 60px 20px; text-align: center; color: #888;
+}
+.empty-state .icon { font-size: 40px; margin-bottom: 8px; }
+.empty-state h3 { color: #333; margin-bottom: 4px; font-size: 16px; }
+.empty-state p  { font-size: 13px; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .list-stats { grid-template-columns: repeat(2, 1fr); }
+  .toolbar-left .search { min-width: 0; flex: 1; }
+}
+@media (max-width: 600px) {
+  .table th:nth-child(4), .table td:nth-child(4),  /* Price */
+  .table th:nth-child(6), .table td:nth-child(6),  /* Live */
+  .table th:nth-child(7), .table td:nth-child(7) { /* Updated */
+    display: none;
+  }
 }
