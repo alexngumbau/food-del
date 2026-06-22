@@ -217,7 +217,7 @@ const Dashboard = () => {
           <span>Sales Trend (last 7 days)</span>
           <span className="chart-legend">
             <span className="legend-item"><span className="dot revenue"></span>Revenue</span>
-            <span className="legend-item"><span className="dot orders"></span>Orders</span>
+              <span className="legend-item"><span className="dot orders-legend"></span>Orders</span>
           </span>
         </h3>
 
